@@ -1,8 +1,9 @@
 use crate::tokenizer::Number::{Integer, Decimal};
-use regex::Regex;
 use crate::tokenizer::Operator::{Addition, Subtraction, Multiplication, Division, Modulo};
 use crate::tokenizer::Token::{NumberTokenType, OperatorTokenType, GroupTokenType};
 use std::fmt::Debug;
+
+use regex::Regex;
 
 #[derive(Debug)]
 pub enum Number {
@@ -143,8 +144,11 @@ impl NumberToken {
     pub fn from(content: &str) -> (usize, Option<NumberToken>) {
         //println!("Given: {}", content);
         let offset: usize;
-        let pattern = Regex::new("-?[0-9]+(\\.[0-9]+)?").unwrap();
-        let content: String = match pattern.find(content) {
+        lazy_static! {
+            static ref PATTERN: Regex = Regex::new("-?[0-9]+(\\.[0-9]+)?").unwrap();
+        }
+
+        let content: String = match PATTERN.find(content) {
             Some(result) => {
                 let res_string = content[result.start()..result.end()].to_owned();
                 //println!("Match from {start} to {end}: {str}", start=result.start(), end=result.end(), str=res_string);
@@ -186,8 +190,10 @@ impl OperatorToken {
     pub fn from(content: &str) -> (usize, Option<OperatorToken>) {
         //println!("Given: {}", content);
         let offset: usize;
-        let pattern = Regex::new("[-+*/%]").unwrap();
-        let content: String = match pattern.find(content) {
+        lazy_static! {
+            static ref PATTERN: Regex = Regex::new("[-+*/%]").unwrap();
+        }
+        let content: String = match PATTERN.find(content) {
             Some(result) => {
                 let res_string = content[result.start()..result.end()].to_owned();
                 //println!("Match from {start} to {end}: {str}", start=result.start(), end=result.end(), str=res_string);

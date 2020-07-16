@@ -2,6 +2,10 @@ use std::{env,io};
 use std::io::Write;
 use crate::tokenizer::Token;
 
+#[allow(unused_imports)]
+#[macro_use] extern crate lazy_static;
+extern crate regex;
+
 mod tokenizer;
 mod solver;
 
