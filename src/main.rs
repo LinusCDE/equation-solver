@@ -1,6 +1,7 @@
 use std::{env,io};
 use std::io::Write;
 use crate::tokenizer::{NumberToken, Token};
+use std::ptr::eq;
 
 mod tokenizer;
 
@@ -27,21 +28,27 @@ fn main() {
     };
 
     // Remove all spaces and tabs
-    let raw_equation = raw_equation.replace(" ", "").replace("\t", "").to_owned();
+    //let raw_equation = raw_equation.replace(" ", "").replace("\t", "").to_owned();
 
     println!("You entered: {}", raw_equation);
 
-    let (le, token) = NumberToken::from(raw_equation.as_str());
+    let mut cursor = 0;
+    while cursor < raw_equation.len() {
+        let (le, token) = NumberToken::from(&raw_equation[cursor..]);
 
-    match token {
-        Some(token) => {
-            println!("The number token consumed {len} chars, is of type {ttype} and \
+        match token {
+            Some(token) => {
+                println!("The number token consumed {len} chars, is of type {ttype} and \
             as as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
-                     len=le, ttype=token.type_name(), str=token.as_string(),
-                     is_integer=token.is_integer(), is_decimal=token.is_decimal())
-        },
-        None => {
-            println!("The number token consumed {len} chars. No token as returned", len=le)
+                         len = le, ttype = token.type_name(), str = token.as_string(),
+                         is_integer = token.is_integer(), is_decimal = token.is_decimal());
+            },
+            None => {
+                println!("The number token consumed {len} chars. No token as returned", len = le);
+                return; // Exit
+            }
         }
+
+        cursor += le;
     }
 }
