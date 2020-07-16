@@ -7,7 +7,7 @@ mod tokenizer;
 fn main() {
     // Get raw_equation either as first passed argument or prompt from user
     let args: Vec<String> = env::args().collect();
-    let raw_equation: String = if(args.len() > 1) {
+    let raw_equation: String = if args.len() > 1 {
         args[1].trim().to_owned()
     }else {
         let mut line = String::new();
