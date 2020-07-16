@@ -2,8 +2,8 @@ use crate::tokenizer::Number::{Integer, Decimal};
 use crate::tokenizer::Operator::{Addition, Subtraction, Multiplication, Division, Modulo};
 use crate::tokenizer::Token::{NumberTokenType, OperatorTokenType, GroupTokenType};
 use std::fmt::Debug;
-
 use regex::Regex;
+
 
 #[derive(Debug)]
 pub enum Number {
@@ -66,41 +66,47 @@ impl Token {
         let mut cursor = 0;
 
         while cursor < content.len() {
-            let (accepted_length, token) = OperatorToken::from(&content[cursor..]);
+            let mut accepted_length: usize = 0;
+            let mut accepted_token: Option<Token> = None;
 
-            if let Some(token) = token {
+            let content_at_cursor = &content[cursor..];
+
+            // Try to parse as operator
+            let (tmp_length, tmp_token) = OperatorToken::from(content_at_cursor);
+            if let Some(token) = tmp_token {
+                accepted_length = tmp_length;
+                accepted_token = Some(OperatorTokenType(token));
+            }
+
+            // Try to parse as number
+            if accepted_token.is_none() {
+                let (tmp_length, tmp_token) = NumberToken::from(content_at_cursor);
+                if let Some(token) = tmp_token {
+                    accepted_length = tmp_length;
+                    accepted_token = Some(NumberTokenType(token));
+                }
+            }
+
+            // Try to parse as group
+            if accepted_token.is_none() {
+                let (tmp_length, tmp_token) = GroupToken::from(content_at_cursor);
+                if let Some(token) = tmp_token {
+                    accepted_length = tmp_length;
+                    accepted_token = Some(GroupTokenType(token));
+                }
+            }
+
+            // Check if something was found
+            if let Some(accepted_token) = accepted_token {
                 //println!("The operator consumed {len} chars, is of type {ttype} and as \
                 //as_string \"{str}\"",
                 //         len = le, ttype = token.type_name(), str = token.as_string());
                 cursor += accepted_length;
-                tokens.push(OperatorTokenType(token));
-                continue
+                tokens.push(accepted_token);
+            }else {
+                cursor += 1 // Try next char
             }
 
-            let (accepted_length, token) = NumberToken::from(&content[cursor..]);
-
-            if let Some(token) = token {
-                //println!("The number token consumed {len} chars, is of type {ttype} and as \
-                //as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
-                //         len = le, ttype = token.type_name(), str = token.as_string(),
-                //         is_integer = token.is_integer(), is_decimal = token.is_decimal());
-                cursor += accepted_length;
-                tokens.push(NumberTokenType(token));
-                continue
-            }
-
-            let (accepted_length, token) = GroupToken::from(&content[cursor..]);
-
-            if let Some(token) = token {
-                //println!("The operator consumed {len} chars, is of type {ttype} and as \
-                //as_string \"{str}\"",
-                //         len = le, ttype = token.type_name(), str = token.as_string());
-                cursor += accepted_length;
-                tokens.push(GroupTokenType(token));
-                continue
-            }
-
-            cursor += 1;
         }
 
         tokens
