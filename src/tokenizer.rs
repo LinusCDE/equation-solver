@@ -1,16 +1,88 @@
 use crate::tokenizer::Number::{Integer, Decimal};
 use regex::Regex;
 use crate::tokenizer::Operator::{Addition, Subtraction, Multiplication, Division, Modulo};
+use crate::tokenizer::Token::{NumberTokenType, OperatorTokenType};
+use std::fmt::Debug;
 
-pub trait Token {
-    fn as_string(&self) -> String;
-    fn type_name(&self) -> &str;
-    // TODO: find possibility to declare constructor method from(content: &str) -> (usize, Option<something Self>)
-}
-
+#[derive(Debug)]
 pub enum Number {
     Integer(i64),
     Decimal(f64)
+}
+
+#[derive(Debug)]
+pub struct NumberToken {
+    pub number: Number
+}
+
+#[derive(Debug)]
+pub enum Operator {
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    Modulo,
+}
+
+#[derive(Debug)]
+pub struct OperatorToken {
+    pub operator: Operator
+}
+
+#[derive(Debug)]
+pub enum Token {
+    NumberTokenType(NumberToken),
+    OperatorTokenType(OperatorToken),
+}
+
+impl Token {
+    pub fn as_string(&self) -> String {
+        match self {
+            NumberTokenType(token) => token.number.as_string(),
+            OperatorTokenType(token) => token.operator.as_str().to_owned(),
+        }
+    }
+
+    pub fn type_name(&self) -> &str {
+        match self {
+            NumberTokenType(_) => "NumberToken",
+            OperatorTokenType(_) => "OperatorToken",
+        }
+    }
+
+    pub fn parse(content: &str) -> Vec<Token> {
+        let mut tokens: Vec<Token> = Vec::new();
+        let mut cursor = 0;
+
+        while cursor < content.len() {
+            let (le, token) = NumberToken::from(&content[cursor..]);
+
+            if let Some(token) = token {
+                //println!("The number token consumed {len} chars, is of type {ttype} and as \
+                //as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
+                //         len = le, ttype = token.type_name(), str = token.as_string(),
+                //         is_integer = token.is_integer(), is_decimal = token.is_decimal());
+                cursor += le;
+                tokens.push(NumberTokenType(token));
+                continue
+            }
+
+            let (le, token) = OperatorToken::from(&content[cursor..]);
+
+            if let Some(token) = token {
+                //println!("The operator consumed {len} chars, is of type {ttype} and as \
+                //as_string \"{str}\"",
+                //         len = le, ttype = token.type_name(), str = token.as_string());
+                cursor += le;
+                tokens.push(OperatorTokenType(token));
+                continue
+            }
+
+            cursor += 1;
+        }
+
+        tokens
+    }
 }
 
 impl Number {
@@ -20,10 +92,6 @@ impl Number {
             Decimal(decimal) => format!("{}", decimal)
         }
     }
-}
-
-pub struct NumberToken {
-    pub number: Number
 }
 
 impl NumberToken {
@@ -64,24 +132,6 @@ impl NumberToken {
     }
 }
 
-impl Token for NumberToken {
-    fn as_string(&self) -> String {
-        self.number.as_string()
-    }
-
-    fn type_name(&self) -> &str {
-        "NumberToken"
-    }
-}
-
-pub enum Operator {
-    Addition,
-    Subtraction,
-    Multiplication,
-    Division,
-    Modulo,
-}
-
 impl Operator {
     fn as_str(&self) -> &str {
         match self {
@@ -92,10 +142,6 @@ impl Operator {
             Modulo => "%",
         }
     }
-}
-
-pub struct OperatorToken {
-    pub operator: Operator
 }
 
 impl OperatorToken {
@@ -134,15 +180,5 @@ impl OperatorToken {
         }
 
         (0, None)
-    }
-}
-
-impl Token for OperatorToken {
-    fn as_string(&self) -> String {
-        self.operator.as_str().to_owned()
-    }
-
-    fn type_name(&self) -> &str {
-        "OperatorToken"
     }
 }
