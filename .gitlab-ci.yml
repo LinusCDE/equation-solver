@@ -1,0 +1,31 @@
+image: rust:latest
+
+release:x86_64:
+  stage: build
+  tags:
+    - docker
+    - x86_64
+  variables:
+    CARGO_HOME: $CI_PROJECT_DIR/cargo
+  cache:
+    paths:
+      - cargo/
+  script: 'cargo build --release'
+  artifacts:
+    paths:
+      - target/release/equation_solver
+
+release:armv7:
+  stage: build
+  tags:
+    - docker
+    - armv7
+  variables:
+    CARGO_HOME: $CI_PROJECT_DIR/cargo
+  cache:
+    paths:
+      - cargo/
+  script: 'cargo build --release'
+  artifacts:
+    paths:
+      - target/release/equation_solver
