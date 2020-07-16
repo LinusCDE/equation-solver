@@ -1,8 +1,10 @@
 use std::{env,io};
 use std::io::Write;
 use crate::tokenizer::Token;
+use crate::solver::solve;
 
 mod tokenizer;
+mod solver;
 
 fn main() {
     // Get raw_equation either as first passed argument or prompt from user
@@ -30,9 +32,19 @@ fn main() {
     //let raw_equation = raw_equation.replace(" ", "").replace("\t", "").to_owned();
 
     println!("You entered: {}", raw_equation);
-    for token in Token::parse(&raw_equation) {
+    let parsed = Token::parse(&raw_equation);
+    /*for token in &parsed {
         println!("----------");
         println!("Debug:  {:?}", token);
         println!("String: {}", token.as_string());
+    }*/
+
+    match solver::solve(&parsed) {
+        Ok(result) => {
+            println!("Solved: {}", result.as_string());
+        },
+        Err(message) => {
+            println!("Error while solving: {}", message);
+        }
     }
 }

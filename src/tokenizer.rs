@@ -15,7 +15,7 @@ pub struct NumberToken {
     pub number: Number
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Operator {
     Addition,
     Subtraction,
@@ -105,23 +105,37 @@ impl Token {
 }
 
 impl Number {
-    fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String {
         match self {
             Integer(integer) => format!("{}", integer),
             Decimal(decimal) => format!("{}", decimal)
         }
     }
-}
 
-impl NumberToken {
     pub fn is_integer(&self) -> bool {
-        return if let Integer(_) = self.number { true } else { false }
+        return if let Integer(_) = self { true } else { false }
     }
 
     pub fn is_decimal(&self) -> bool {
-        return if let Decimal(_) = self.number { true } else { false }
+        return if let Decimal(_) = self { true } else { false }
     }
 
+    pub fn as_decimal(&self) -> f64 {
+        match self {
+            Integer(integer) => *integer as f64,
+            Decimal(decimal) => *decimal,
+        }
+    }
+
+    pub fn as_integer(&self) -> Result<i64, ()> {
+        match self {
+            Integer(integer) => Ok(*integer),
+            Decimal(decimal) => Err(()),
+        }
+    }
+}
+
+impl NumberToken {
     pub fn from(content: &str) -> (usize, Option<NumberToken>) {
         //println!("Given: {}", content);
         let mut offset: usize = 0;
@@ -204,7 +218,7 @@ impl OperatorToken {
 
 impl GroupToken {
     pub fn from(content: &str) -> (usize, Option<GroupToken>) {
-        println!("Given: {}", content);
+        //println!("Given: {}", content);
         if content.len() == 0 {
             return (0, None)
         }
@@ -245,5 +259,46 @@ impl GroupToken {
         }
         string.push_str(")");
         string
+    }
+}
+
+impl Clone for Number {
+    fn clone(&self) -> Self {
+        match self {
+            Integer(integer) => Integer(*integer),
+            Decimal(decimal) => Decimal(*decimal),
+        }
+    }
+}
+
+impl Clone for NumberToken {
+    fn clone(&self) -> Self {
+        return NumberToken { number: self.number.clone() }
+    }
+}
+
+impl Clone for OperatorToken {
+    fn clone(&self) -> Self {
+        return OperatorToken { operator: self.operator.clone() }
+    }
+}
+
+impl Clone for GroupToken {
+    fn clone(&self) -> Self {
+        let mut tokens: Vec<Token> = Vec::new();
+        for token in self.tokens.iter() {
+            tokens.push(token.clone());
+        }
+        GroupToken { tokens }
+    }
+}
+
+impl Clone for Token {
+    fn clone(&self) -> Self {
+        match self {
+            GroupTokenType(token) => GroupTokenType(token.clone()),
+            OperatorTokenType(token) => OperatorTokenType(token.clone()),
+            NumberTokenType(token) => NumberTokenType(token.clone()),
+        }
     }
 }
