@@ -66,36 +66,36 @@ impl Token {
         let mut cursor = 0;
 
         while cursor < content.len() {
-            let (le, token) = NumberToken::from(&content[cursor..]);
+            let (accepted_length, token) = OperatorToken::from(&content[cursor..]);
+
+            if let Some(token) = token {
+                //println!("The operator consumed {len} chars, is of type {ttype} and as \
+                //as_string \"{str}\"",
+                //         len = le, ttype = token.type_name(), str = token.as_string());
+                cursor += accepted_length;
+                tokens.push(OperatorTokenType(token));
+                continue
+            }
+
+            let (accepted_length, token) = NumberToken::from(&content[cursor..]);
 
             if let Some(token) = token {
                 //println!("The number token consumed {len} chars, is of type {ttype} and as \
                 //as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
                 //         len = le, ttype = token.type_name(), str = token.as_string(),
                 //         is_integer = token.is_integer(), is_decimal = token.is_decimal());
-                cursor += le;
+                cursor += accepted_length;
                 tokens.push(NumberTokenType(token));
                 continue
             }
 
-            let (le, token) = OperatorToken::from(&content[cursor..]);
+            let (accepted_length, token) = GroupToken::from(&content[cursor..]);
 
             if let Some(token) = token {
                 //println!("The operator consumed {len} chars, is of type {ttype} and as \
                 //as_string \"{str}\"",
                 //         len = le, ttype = token.type_name(), str = token.as_string());
-                cursor += le;
-                tokens.push(OperatorTokenType(token));
-                continue
-            }
-
-            let (le, token) = GroupToken::from(&content[cursor..]);
-
-            if let Some(token) = token {
-                //println!("The operator consumed {len} chars, is of type {ttype} and as \
-                //as_string \"{str}\"",
-                //         len = le, ttype = token.type_name(), str = token.as_string());
-                cursor += le;
+                cursor += accepted_length;
                 tokens.push(GroupTokenType(token));
                 continue
             }
