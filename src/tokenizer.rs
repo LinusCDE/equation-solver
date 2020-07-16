@@ -42,6 +42,7 @@ pub enum Token {
 }
 
 impl Token {
+    #[allow(dead_code)]
     pub fn as_string(&self) -> String {
         match self {
             NumberTokenType(token) => token.number.as_string(),
@@ -50,6 +51,7 @@ impl Token {
         }
     }
 
+    #[allow(dead_code)]
     pub fn type_name(&self) -> &str {
         match self {
             NumberTokenType(_) => "NumberToken",
@@ -112,10 +114,12 @@ impl Number {
         }
     }
 
+    #[allow(dead_code)]
     pub fn is_integer(&self) -> bool {
         return if let Integer(_) = self { true } else { false }
     }
 
+    #[allow(dead_code)]
     pub fn is_decimal(&self) -> bool {
         return if let Decimal(_) = self { true } else { false }
     }
@@ -130,7 +134,7 @@ impl Number {
     pub fn as_integer(&self) -> Result<i64, ()> {
         match self {
             Integer(integer) => Ok(*integer),
-            Decimal(decimal) => Err(()),
+            Decimal(_) => Err(()),
         }
     }
 }
@@ -138,7 +142,7 @@ impl Number {
 impl NumberToken {
     pub fn from(content: &str) -> (usize, Option<NumberToken>) {
         //println!("Given: {}", content);
-        let mut offset: usize = 0;
+        let offset: usize;
         let pattern = Regex::new("-?[0-9]+(\\.[0-9]+)?").unwrap();
         let content: String = match pattern.find(content) {
             Some(result) => {
@@ -166,6 +170,7 @@ impl NumberToken {
 }
 
 impl Operator {
+    #[allow(dead_code)]
     fn as_str(&self) -> &str {
         match self {
             Addition => "+",
@@ -180,7 +185,7 @@ impl Operator {
 impl OperatorToken {
     pub fn from(content: &str) -> (usize, Option<OperatorToken>) {
         //println!("Given: {}", content);
-        let mut offset: usize = 0;
+        let offset: usize;
         let pattern = Regex::new("[-+*/%]").unwrap();
         let content: String = match pattern.find(content) {
             Some(result) => {
@@ -252,6 +257,7 @@ impl GroupToken {
         }
     }
 
+    #[allow(dead_code)]
     pub fn as_string(&self) -> String {
         let mut string = String::from("(");
         for token in self.tokens.iter() {

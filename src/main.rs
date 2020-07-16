@@ -1,7 +1,6 @@
 use std::{env,io};
 use std::io::Write;
 use crate::tokenizer::Token;
-use crate::solver::solve;
 
 mod tokenizer;
 mod solver;
@@ -15,15 +14,15 @@ fn main() {
         let mut line = String::new();
         loop {
             print!("Enter the equation: ");
-            io::stdout().flush();
+            io::stdout().flush().unwrap();
             match io::stdin().read_line(&mut line) {
-                Ok(length) => {
+                Ok(_) => {
                     line = line.trim().to_owned(); // raw line has \n at end. trimming that away.
                     if line.len() > 0 {
                         break line
                     }
                 },
-                Err(e) => { }
+                Err(_) => { }
             }
         }
     };
