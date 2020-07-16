@@ -31,6 +31,8 @@ fn main() {
 
     println!("You entered: {}", raw_equation);
     for token in Token::parse(&raw_equation) {
-        println!("{:?}", token);
+        println!("----------");
+        println!("Debug:  {:?}", token);
+        println!("String: {}", token.as_string());
     }
 }

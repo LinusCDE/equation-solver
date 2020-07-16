@@ -1,7 +1,7 @@
 use crate::tokenizer::Number::{Integer, Decimal};
 use regex::Regex;
 use crate::tokenizer::Operator::{Addition, Subtraction, Multiplication, Division, Modulo};
-use crate::tokenizer::Token::{NumberTokenType, OperatorTokenType};
+use crate::tokenizer::Token::{NumberTokenType, OperatorTokenType, GroupTokenType};
 use std::fmt::Debug;
 
 #[derive(Debug)]
@@ -30,9 +30,15 @@ pub struct OperatorToken {
 }
 
 #[derive(Debug)]
+pub struct GroupToken { // ( ... )
+    pub tokens: Vec<Token>
+}
+
+#[derive(Debug)]
 pub enum Token {
     NumberTokenType(NumberToken),
     OperatorTokenType(OperatorToken),
+    GroupTokenType(GroupToken),
 }
 
 impl Token {
@@ -40,6 +46,7 @@ impl Token {
         match self {
             NumberTokenType(token) => token.number.as_string(),
             OperatorTokenType(token) => token.operator.as_str().to_owned(),
+            GroupTokenType(token) => token.as_string(),
         }
     }
 
@@ -47,6 +54,7 @@ impl Token {
         match self {
             NumberTokenType(_) => "NumberToken",
             OperatorTokenType(_) => "OperatorToken",
+            GroupTokenType(_) => "NestedToken",
         }
     }
 
@@ -75,6 +83,17 @@ impl Token {
                 //         len = le, ttype = token.type_name(), str = token.as_string());
                 cursor += le;
                 tokens.push(OperatorTokenType(token));
+                continue
+            }
+
+            let (le, token) = GroupToken::from(&content[cursor..]);
+
+            if let Some(token) = token {
+                //println!("The operator consumed {len} chars, is of type {ttype} and as \
+                //as_string \"{str}\"",
+                //         len = le, ttype = token.type_name(), str = token.as_string());
+                cursor += le;
+                tokens.push(GroupTokenType(token));
                 continue
             }
 
@@ -180,5 +199,51 @@ impl OperatorToken {
         }
 
         (0, None)
+    }
+}
+
+impl GroupToken {
+    pub fn from(content: &str) -> (usize, Option<GroupToken>) {
+        println!("Given: {}", content);
+        if content.len() == 0 {
+            return (0, None)
+        }
+
+        if ! content[0..1].eq_ignore_ascii_case("(") {
+            return (0, None)
+        }
+
+        let mut nested_count = 0;
+        let mut i: i32 = -1;
+        let length: usize = 'find_context: loop {
+            for char in content.chars() {
+                i += 1;
+                if char == '(' {
+                    nested_count += 1
+                } else if char == ')' {
+                    nested_count -= 1;
+                    if nested_count == 0 {
+                        break 'find_context (i + 1) as usize
+                    }
+                }
+            }
+            break 'find_context 0 // Invalid (didn't find matching closing bracket in given content)
+        };
+
+        if length > 0 {
+            let inner_content = &content[1..length-1]; // "("inner_content")"
+            (length, Some(GroupToken { tokens: Token::parse(inner_content)}))
+        }else {
+            (0, None)
+        }
+    }
+
+    pub fn as_string(&self) -> String {
+        let mut string = String::from("(");
+        for token in self.tokens.iter() {
+            string.push_str(token.as_string().as_str());
+        }
+        string.push_str(")");
+        string
     }
 }
