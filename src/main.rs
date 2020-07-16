@@ -1,6 +1,6 @@
 use std::{env,io};
 use std::io::Write;
-use crate::tokenizer::{NumberToken, Token};
+use crate::tokenizer::{NumberToken, Token, OperatorToken};
 use std::ptr::eq;
 
 mod tokenizer;
@@ -36,19 +36,26 @@ fn main() {
     while cursor < raw_equation.len() {
         let (le, token) = NumberToken::from(&raw_equation[cursor..]);
 
-        match token {
-            Some(token) => {
-                println!("The number token consumed {len} chars, is of type {ttype} and \
-            as as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
+        if let Some(token) = token {
+                println!("The number token consumed {len} chars, is of type {ttype} and as \
+                as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
                          len = le, ttype = token.type_name(), str = token.as_string(),
                          is_integer = token.is_integer(), is_decimal = token.is_decimal());
-            },
-            None => {
-                println!("The number token consumed {len} chars. No token as returned", len = le);
-                return; // Exit
-            }
+            cursor += le;
+            continue
         }
 
-        cursor += le;
+        let (le, token) = OperatorToken::from(&raw_equation[cursor..]);
+
+        if let Some(token) = token {
+            println!("The operator consumed {len} chars, is of type {ttype} and as \
+                as_string \"{str}\"",
+                     len = le, ttype = token.type_name(), str = token.as_string());
+            cursor += le;
+            continue
+        }
+
+        // No matched found at current pos. Try next one
+        cursor += 1
     }
 }
