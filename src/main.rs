@@ -35,8 +35,10 @@ fn main() {
 
     match token {
         Some(token) => {
-            println!("The number token consumed {len} chars, is of type {ttype} and as as_string \"{str}\"",
-                     len=le, ttype=token.type_name(), str=token.as_string())
+            println!("The number token consumed {len} chars, is of type {ttype} and \
+            as as_string \"{str}\" (integer = {is_integer}, decimal = {is_decimal})",
+                     len=le, ttype=token.type_name(), str=token.as_string(),
+                     is_integer=token.is_integer(), is_decimal=token.is_decimal())
         },
         None => {
             println!("The number token consumed {len} chars. No token as returned", len=le)

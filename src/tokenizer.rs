@@ -21,15 +21,15 @@ impl Number {
 }
 
 pub struct NumberToken {
-    number: Number
+    pub number: Number
 }
 
 impl NumberToken {
-    fn is_integer(&self) -> bool {
+    pub fn is_integer(&self) -> bool {
         return if let Integer(_) = self.number { true } else { false }
     }
 
-    fn is_decimal(&self) -> bool {
+    pub fn is_decimal(&self) -> bool {
         return if let Decimal(_) = self.number { true } else { false }
     }
 
