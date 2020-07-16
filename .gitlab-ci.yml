@@ -13,7 +13,7 @@ release:x86_64:
   script: 'cargo build --release'
   artifacts:
     paths:
-      - target/release/equation_solver
+      - target/release/equation-solver
 
 release:armv7:
   stage: build
@@ -28,4 +28,4 @@ release:armv7:
   script: 'cargo build --release'
   artifacts:
     paths:
-      - target/release/equation_solver
+      - target/release/equation-solver
