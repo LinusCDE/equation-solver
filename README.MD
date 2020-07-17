@@ -1,7 +1,8 @@
 # equation-solver
 
-Project to learn some rust.
+A Project to learn some rust.
 
+Builds for x86_64 and Armv7 (compiled on an actual arm machine) are [avilable here](https://git.cosmos-ink.net/linus/equation-solver). This github git repository is only a mirror.
 
 TODO:
 
